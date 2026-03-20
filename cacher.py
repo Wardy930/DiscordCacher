@@ -61,7 +61,9 @@ def get_cache_status(user_share_path: str) -> dict:
         return {"status": "already_cached"}
 
     # Search array disks: /mnt/disk1, /mnt/disk2, etc.
-    pattern = os.path.join("/mnt/disk*", rel)
+    # Escape glob special characters in the relative path so that
+    # brackets, question marks, etc. in filenames are matched literally.
+    pattern = os.path.join("/mnt/disk*", glob.escape(rel))
     matches = glob.glob(pattern)
     if matches:
         return {
