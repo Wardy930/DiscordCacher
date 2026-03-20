@@ -39,17 +39,17 @@ def _translate_plex_path(plex_path: str) -> str:
     PLEX_PATH_REPLACE.  Otherwise returns the path unchanged.
     """
     if not config.PLEX_PATH_PREFIX:
-        log.debug("No PLEX_PATH_PREFIX configured, using raw path: %s", plex_path)
+        log.info("No PLEX_PATH_PREFIX configured, using raw path: %s", plex_path)
         return plex_path
     prefix = config.PLEX_PATH_PREFIX.rstrip("/") + "/"
     if plex_path.startswith(prefix):
         translated = config.PLEX_PATH_REPLACE.rstrip("/") + "/" + plex_path[len(prefix):]
-        log.debug("Translated plex path: %s -> %s", plex_path, translated)
+        log.info("Translated plex path: %s -> %s", plex_path, translated)
         return translated
     # Also handle exact match (no trailing content)
     if plex_path.rstrip("/") == config.PLEX_PATH_PREFIX.rstrip("/"):
         translated = config.PLEX_PATH_REPLACE.rstrip("/")
-        log.debug("Translated plex path (exact match): %s -> %s", plex_path, translated)
+        log.info("Translated plex path (exact match): %s -> %s", plex_path, translated)
         return translated
     log.warning(
         "Plex path %r does not start with configured PLEX_PATH_PREFIX %r — "
@@ -79,8 +79,8 @@ def get_cache_status(user_share_path: str) -> dict:
         {"status": "on_array", "array_path": str, "cache_path": str} or
         {"status": "not_found"}
     """
-    log.debug("get_cache_status called with path: %s", user_share_path)
-    log.debug("USER_SHARE_BASE=%s, CACHE_BASE=%s", config.USER_SHARE_BASE, config.CACHE_BASE)
+    log.info("get_cache_status called with path: %s", user_share_path)
+    log.info("USER_SHARE_BASE=%s, CACHE_BASE=%s", config.USER_SHARE_BASE, config.CACHE_BASE)
 
     rel = _relative_path(user_share_path)
     if rel is None:
@@ -90,21 +90,21 @@ def get_cache_status(user_share_path: str) -> dict:
         )
         return {"status": "not_found"}
 
-    log.debug("Relative path: %s", rel)
+    log.info("Relative path: %s", rel)
 
     cache_path = os.path.join(config.CACHE_BASE, rel)
     if os.path.exists(cache_path):
-        log.debug("File found on cache at: %s", cache_path)
+        log.info("File found on cache at: %s", cache_path)
         return {"status": "already_cached"}
 
     # Search array disks: /mnt/disk1, /mnt/disk2, etc.
     # Escape glob special characters in the relative path so that
     # brackets, question marks, etc. in filenames are matched literally.
     pattern = os.path.join("/mnt/disk*", glob.escape(rel))
-    log.debug("Searching array disks with pattern: %s", pattern)
+    log.info("Searching array disks with pattern: %s", pattern)
     matches = glob.glob(pattern)
     if matches:
-        log.debug("Found on array disk: %s", matches[0])
+        log.info("Found on array disk: %s", matches[0])
         return {
             "status": "on_array",
             "array_path": matches[0],

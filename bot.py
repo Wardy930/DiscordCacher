@@ -10,9 +10,10 @@ import cacher
 import config
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
 )
+logging.getLogger("cacher").setLevel(logging.DEBUG)
 log = logging.getLogger(__name__)
 
 intents = discord.Intents.default()
