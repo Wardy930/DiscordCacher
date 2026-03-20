@@ -27,9 +27,26 @@ def search_movies(query: str) -> list[dict]:
         movies.append({
             "title": movie.title,
             "year": movie.year,
-            "file_path": locations[0],
+            "file_path": _translate_plex_path(locations[0]),
         })
     return movies
+
+
+def _translate_plex_path(plex_path: str) -> str:
+    """Translate a Plex container path to the host path.
+
+    If PLEX_PATH_PREFIX is configured, replaces that prefix with
+    PLEX_PATH_REPLACE.  Otherwise returns the path unchanged.
+    """
+    if not config.PLEX_PATH_PREFIX:
+        return plex_path
+    prefix = config.PLEX_PATH_PREFIX.rstrip("/") + "/"
+    if plex_path.startswith(prefix):
+        return config.PLEX_PATH_REPLACE.rstrip("/") + "/" + plex_path[len(prefix):]
+    # Also handle exact match (no trailing content)
+    if plex_path.rstrip("/") == config.PLEX_PATH_PREFIX.rstrip("/"):
+        return config.PLEX_PATH_REPLACE.rstrip("/")
+    return plex_path
 
 
 def _relative_path(user_share_path: str) -> str | None:
