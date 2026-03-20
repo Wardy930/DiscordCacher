@@ -172,10 +172,18 @@ async def confirm_command(interaction: discord.Interaction):
 
     if status["status"] == "not_found":
         selected.pop(user_id, None)
+        rel = cacher._relative_path(movie["file_path"])
+        debug_lines = [
+            f"Plex path: `{movie['file_path']}`",
+            f"USER_SHARE_BASE: `{config.USER_SHARE_BASE}`",
+            f"PLEX_PATH_PREFIX: `{config.PLEX_PATH_PREFIX or '(not set)'}`",
+            f"PLEX_PATH_REPLACE: `{config.PLEX_PATH_REPLACE or '(not set)'}`",
+            f"Relative path: `{rel or '(None — prefix mismatch)'}`",
+        ]
         await interaction.followup.send(
             f"Could not locate the file on any array disk. "
-            f"It may have been moved or deleted.\n"
-            f"Debug — path from Plex: `{movie['file_path']}`"
+            f"It may have been moved or deleted.\n\n"
+            f"**Debug info:**\n" + "\n".join(debug_lines)
         )
         return
 
