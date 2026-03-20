@@ -1,0 +1,9 @@
+services:
+  discord-cacher:
+    build: .
+    container_name: discord-cacher
+    restart: unless-stopped
+    network_mode: host
+    env_file: .env
+    volumes:
+      - /mnt:/mnt
