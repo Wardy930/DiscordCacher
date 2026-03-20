@@ -10,7 +10,7 @@ import cacher
 import config
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
 )
 log = logging.getLogger(__name__)
@@ -173,7 +173,8 @@ async def confirm_command(interaction: discord.Interaction):
         selected.pop(user_id, None)
         await interaction.followup.send(
             f"Could not locate the file on any array disk. "
-            f"It may have been moved or deleted."
+            f"It may have been moved or deleted.\n"
+            f"Debug — path from Plex: `{movie['file_path']}`"
         )
         return
 
