@@ -36,6 +36,7 @@ def channel_check(interaction: discord.Interaction) -> bool:
 @tree.command(name="cache", description="Search for a movie to pre-cache")
 @app_commands.describe(movie_name="Movie title to search for")
 async def cache_command(interaction: discord.Interaction, movie_name: str):
+    log.info("/cache invoked by %s in channel %s: %r", interaction.user, interaction.channel_id, movie_name)
     if not channel_check(interaction):
         await interaction.response.send_message(
             "This command can only be used in the designated channel.",
@@ -88,6 +89,7 @@ async def cache_command(interaction: discord.Interaction, movie_name: str):
 @tree.command(name="pick", description="Pick a movie from the search results")
 @app_commands.describe(number="The number of the movie to select")
 async def pick_command(interaction: discord.Interaction, number: int):
+    log.info("/pick invoked by %s: %d", interaction.user, number)
     if not channel_check(interaction):
         await interaction.response.send_message(
             "This command can only be used in the designated channel.",
@@ -136,6 +138,7 @@ async def pick_command(interaction: discord.Interaction, number: int):
 
 @tree.command(name="confirm", description="Confirm and move the selected movie to cache")
 async def confirm_command(interaction: discord.Interaction):
+    log.info("/confirm invoked by %s", interaction.user)
     if not channel_check(interaction):
         await interaction.response.send_message(
             "This command can only be used in the designated channel.",
@@ -230,10 +233,26 @@ async def confirm_command(interaction: discord.Interaction):
 
 @tree.command(name="cancel", description="Cancel the current selection")
 async def cancel_command(interaction: discord.Interaction):
+    log.info("/cancel invoked by %s", interaction.user)
     user_id = interaction.user.id
     pending.pop(user_id, None)
     selected.pop(user_id, None)
     await interaction.response.send_message("Cancelled.")
+
+
+@tree.error
+async def on_app_command_error(
+    interaction: discord.Interaction, error: app_commands.AppCommandError
+):
+    log.exception("Unhandled error in command %s", interaction.command.name if interaction.command else "unknown", exc_info=error)
+    try:
+        msg = f"Something went wrong: {error}"
+        if interaction.response.is_done():
+            await interaction.followup.send(msg)
+        else:
+            await interaction.response.send_message(msg, ephemeral=True)
+    except Exception:
+        log.exception("Failed to send error message to Discord")
 
 
 @client.event
